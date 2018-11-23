@@ -1,14 +1,26 @@
+const Classifier = require('natural').BayesClassifier;
 const signale = require('signale');
 const Table = require('cli-table');
 
 module.exports = class IntentDesire
 {
-  constructor()
+  constructor(samples = [], inputMsg = '')
   {
-    let utterance = "how much for {ProductName}";
-    let used = "how much for Book";
-    this.utterance = utterance;
-    this.used = used;
+    this.samples = samples;
+    this.sampleClassifier = new Classifier();
+    samples.forEach( (sample, index) => {
+      this.sampleClassifier.addDocument(sample, index);
+    });
+    this.sampleClassifier.train();
+    this.used = inputMsg;
+  }
+
+  /**
+    * Get utterance used based on input msg
+    */
+  get utterance()
+  {
+    return this.samples[this.sampleClassifier.classify(this.used)];
   }
 
   /**
